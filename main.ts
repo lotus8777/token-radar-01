@@ -79,11 +79,11 @@ function copyFiles(from: string, to: string): string[] {
 
 const dash = copyFiles(join(here, 'dashboard'), join(out, 'dashboard'));
 const shots = copyFiles(join(here, 'screenshots'), join(out, 'screenshots'));
-if (dash.length < 3) {
-  process.stderr.write(
-    `token radar: dashboard/ holds ${dash.length} file${dash.length === 1 ? '' : 's'}: hand in index.html, app.css and app.js\n`,
-  );
-  process.exit(1);
+for (const need of ['index.html', 'app.css', 'app.js']) {
+  if (!dash.includes(need)) {
+    process.stderr.write(`token radar: dashboard/${need} is missing: hand in index.html, app.css and app.js\n`);
+    process.exit(1);
+  }
 }
 if (shots.length < 3) {
   process.stderr.write(
@@ -101,8 +101,9 @@ for (const name of shots) {
 }
 
 // The dossier is written last: the scorer rebuilds it from this /output and compares bytes.
+const dossierPath = join(out, 'dossier.json');
 writeFileSync(
-  join(out, 'dossier.json'),
+  dossierPath,
   buildDossier(out, {
     text_max_bytes: TEXT_MAX_BYTES,
     screenshots: SCREENSHOT_CAPS,
@@ -110,7 +111,23 @@ writeFileSync(
   }),
 );
 
+// Read back what was written and confirm it parses and fits the caps, so a broken
+// write fails here instead of in the grader.
+const written = JSON.parse(readFileSync(join(out, 'board.json'), 'utf8')) as { rows: unknown[] };
+if (written.rows.length !== board.length) {
+  process.stderr.write(
+    `token radar: ${join(out, 'board.json')} came back with ${written.rows.length} rows, not ${board.length}\n`,
+  );
+  process.exit(1);
+}
+JSON.parse(readFileSync(dossierPath, 'utf8'));
+const dossierBytes = statSync(dossierPath).size;
+if (dossierBytes > 1_572_864) {
+  process.stderr.write(`token radar: ${dossierPath} is ${dossierBytes} bytes: over the 1.5 MiB cap\n`);
+  process.exit(1);
+}
+
 process.stdout.write(
   `token radar: ${snapshot.protocols.length} protocols, ${snapshot.watchlist.length} on the watchlist, ${board.length} rows scored\n` +
-    `token radar: wrote ${join(out, 'board.json')}, ${join(out, 'data.js')}, ${join(out, 'dashboard')} (${dash.length} files), ${join(out, 'screenshots')} (${shots.length} images) and ${join(out, 'dossier.json')}\n`,
+    `token radar: wrote ${join(out, 'board.json')}, ${join(out, 'data.js')}, ${join(out, 'dashboard')} (${dash.length} files), ${join(out, 'screenshots')} (${shots.length} images) and ${dossierPath} (${dossierBytes} bytes)\n`,
 );
