@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar: pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">Token Radar &middot; model radar-2</p>
+    <h1>Which protocol launches next &mdash; and what would its token be worth?</h1>
+    <p class="lede">Every protocol below records no token on DefiLlama, yet holds real TVL. The radar ranks them by an implied value built only from the snapshot's own figures, and gives each one a farm plan with costs and times.</p>
+    <dl class="stats" id="stats"></dl>
+    <p class="source" id="source"></p>
+  </div>
+</header>
+<main class="wrap">
+  <section class="model" id="model" aria-label="How the radar scores"></section>
+  <nav class="tabs" aria-label="Views">
+    <a href="#/board" id="tab-board">Pre-token radar</a>
+    <a href="#/live" id="tab-live">Already trading</a>
+  </nav>
+  <section class="controls" id="controls" aria-label="Filter the board">
+    <label>Search <input id="q" type="search" placeholder="Name or slug" autocomplete="off"></label>
+    <label>Category <select id="category"></select></label>
+    <label>Chain <select id="chain"></select></label>
+    <label>Min TVL <select id="minTvl">
+      <option value="0">Any</option>
+      <option value="50000000">$50M</option>
+      <option value="100000000">$100M</option>
+      <option value="500000000">$500M</option>
+      <option value="1000000000">$1B</option>
+    </select></label>
+    <label class="check"><input id="watchlistOnly" type="checkbox"> Watchlist only</label>
+  </section>
+  <p class="count" id="count" aria-live="polite"></p>
+  <section id="view" aria-live="polite"></section>
+  <section id="detail" aria-label="Protocol detail"></section>
+</main>
+<footer class="wrap">
+  <h2>How to read this</h2>
+  <p>Implied value is the radar's own claim: TVL times a category multiple, adjusted for seven-day growth, for how long the protocol has run with no token, and for how many chains it is on. It is not a prediction that a token is issued, or when, or at what price. A protocol that records no token may still have one its DefiLlama record does not carry. Farm plans are a starting point, not financial advice: check the protocol's own pages before you put money in, and never pay anyone to claim an airdrop.</p>
+  <p>Data: DefiLlama protocols, fetched once and frozen. No network is used by this page.</p>
+</footer>
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
