@@ -98,6 +98,12 @@ function sortRows(rows) {
   });
 }
 
+/** The first three chains, with a count for the rest, so table rows stay one line tall. */
+function chainsShort(chains) {
+  if (chains.length <= 3) return esc(chains.join(', ') || '—');
+  return `${esc(chains.slice(0, 3).join(', '))} <span class="sub">+${chains.length - 3} more</span>`;
+}
+
 function boardTable(rows) {
   if (rows.length === 0) return '<div class="empty">No protocol matches these filters.</div>';
   const arrow = (k) => (state.sort === k ? (state.dir === 1 ? ' ▲' : ' ▼') : '');
@@ -109,7 +115,7 @@ function boardTable(rows) {
         <td class="num">${r.rank}</td>
         <td><span class="name">${esc(r.name)}</span>${r.watchlist ? '<span class="badge">Watchlist</span>' : ''}<br><span class="sub">${esc(r.slug)}</span></td>
         <td>${esc(r.category || '—')}</td>
-        <td>${esc(r.chains.join(', ') || '—')}</td>
+        <td>${chainsShort(r.chains)}</td>
         <td class="num">${money(r.tvl_usd)}</td>
         <td class="num ${p.c}">${p.t}</td>
         <td class="num">${age(r.age_days)}</td>
@@ -130,7 +136,7 @@ function liveTable() {
       return `<tr>
         <td><span class="name">${esc(r.name)}</span><br><span class="sub">${esc(r.slug)}</span></td>
         <td>${esc(r.category || '—')}</td>
-        <td>${esc(r.chains.join(', ') || '—')}</td>
+        <td>${chainsShort(r.chains)}</td>
         <td class="num">${money(r.tvl_usd)}</td>
         <td class="num"><strong>${money(r.mcap_usd)}</strong></td>
         <td class="num ${p.c}">${p.t}</td>
@@ -178,12 +184,21 @@ function render() {
     detail.innerHTML = '';
   } else {
     const rows = sortRows(filteredRows());
-    $('count').textContent = `${rows.length} of ${D.rows.length} pre-token protocols shown${state.watchlistOnly ? ' (watchlist only)' : ''}. Click a row for its detail and farm plan.`;
-    view.innerHTML = boardTable(rows);
     const sel = state.slug ? D.rows.find((r) => r.slug === state.slug) : null;
-    detail.innerHTML = sel ? detailHtml(sel) : '';
+    if (state.view === 'detail' && sel) {
+      // The detail view is the page, not a panel under a 198-row table: hide the
+      // board so the protocol's arithmetic and farm plan are what the screenshot shows.
+      $('count').textContent = `${sel.name} — rank ${sel.rank} of ${D.rows.length} pre-token protocols.`;
+      view.innerHTML = '';
+      detail.innerHTML = detailHtml(sel);
+    } else {
+      $('count').textContent = `${rows.length} of ${D.rows.length} pre-token protocols shown${state.watchlistOnly ? ' (watchlist only)' : ''}. Click a row for its detail and farm plan.`;
+      view.innerHTML = boardTable(rows);
+      detail.innerHTML = sel ? detailHtml(sel) : '';
+    }
     const close = $('closeDetail');
     if (close) close.addEventListener('click', () => { location.hash = '#/board'; });
+    window.scrollTo(0, 0);
   }
   view.querySelectorAll('th[data-sort]').forEach((th) => {
     th.addEventListener('click', () => {
