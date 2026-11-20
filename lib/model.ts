@@ -480,7 +480,7 @@ export function farmSteps(p: SnapshotProtocol, age: number | null): FarmStep[] {
     },
     {
       text: `Make one qualifying action each week, such as a deposit, a borrow, a swap or a vote, so the activity is not a single day.`,
-      cost: `about ${gas} a week`,
+      cost: `${gas} a week`,
       time: '10 minutes a week',
     },
     {
